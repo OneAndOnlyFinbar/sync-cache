@@ -1,4 +1,4 @@
-declare class GetResponse extends String {
+export declare class GetResponse extends String {
     data: any;
     constructor(data: any);
     log(): void;
@@ -8,8 +8,8 @@ export declare class CacheClient {
     private readonly _port;
     private readonly _token;
     private _ws;
-    private _rawCache;
     private _refreshed;
+    cache: any;
     /**
      * @param {string} address
      * @param {number} port
@@ -38,5 +38,4 @@ export declare class CacheClient {
      */
     delete(key: string): Promise<void>;
 }
-export {};
 //# sourceMappingURL=CacheClient.d.ts.map

@@ -1,12 +1,13 @@
 const WebSocket = require('isomorphic-ws');
+const { LocalCache } = require('./LocalCache');
 
-class GetResponse extends String {
+export class GetResponse extends String {
   data: any;
   constructor(data: any) {
     super();
     this.data = data;
   }
-  log(){
+  log(): void{
     console.log(this.data);
   }
 }
@@ -16,8 +17,8 @@ export class CacheClient {
   private readonly _port: number;
   private readonly _token: string;
   private _ws: typeof WebSocket;
-  private _rawCache: { [key: string]: any } = {};
   private _refreshed: boolean = false;
+  public cache = new LocalCache();
 
   /**
    * @param {string} address
@@ -44,7 +45,7 @@ export class CacheClient {
         case 'setKeyResponse': {
           const { key, value, ttl } = JSON.parse(Buffer.from(payload.data, 'base64').toString());
           const keys = key.split('.');
-          let current = this._rawCache;
+          let current = this.cache.fetchAll();
           for(let i = 0; i < keys.length - 1; i++)
             current[keys[i]] === undefined ? current[keys[i]] = {} : current = current[keys[i]];
           current[keys[keys.length - 1]] = value;
@@ -56,7 +57,7 @@ export class CacheClient {
         }
         case 'fetchAllResponse': {
           const { keys, values } = JSON.parse(Buffer.from(payload.data, 'base64').toString());
-          keys.forEach((key, i) => this._rawCache[key] = values[i]);
+          keys.forEach((key, i) => this.cache.fetchAll()[key] = values[i]);
           this._refreshed = true;
           break;
         }
@@ -73,7 +74,7 @@ export class CacheClient {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     const keys = key.split('.');
-    let current = this._rawCache;
+    let current = this.cache.fetchAll();
     for(let i = 0; i < keys.length - 1; i++)
       current[keys[i]] === undefined ? current[keys[i]] = {} : current = current[keys[i]];
     return new GetResponse(current[keys[keys.length - 1]]);
@@ -90,7 +91,7 @@ export class CacheClient {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     const keys = key.split('.');
-    let current = this._rawCache;
+    let current = this.cache.fetchAll();
     for(let i = 0; i < keys.length - 1; i++)
       current[keys[i]] === undefined ? current[keys[i]] = {} : current = current[keys[i]];
     current[keys[keys.length - 1]] = value;
@@ -112,10 +113,11 @@ export class CacheClient {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     const keys = key.split('.');
-    let current = this._rawCache;
+    let current = this.cache.fetchAll();
     for(let i = 0; i < keys.length - 1; i++)
       current[keys[i]] === undefined ? current[keys[i]] = {} : current = current[keys[i]];
     delete current[keys[keys.length - 1]];
+    this.cache.delete(key);
     this._ws.send(JSON.stringify({
       operation: 'deleteKeyRequest',
       token: this._token,

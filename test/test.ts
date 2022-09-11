@@ -8,5 +8,7 @@ const client2 = new CacheClient({ address: '127.0.0.1', port: 3000, password: '1
 (async() => {
   await client1.set('test', 'test');
   await new Promise((resolve) => setTimeout(resolve, 1000));
-  (await client2.get('test')).log();
+  await client2.delete('test');
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await client2.cache.get('test').log();
 })();
