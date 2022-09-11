@@ -61,6 +61,10 @@ export class CacheClient {
           this._refreshed = true;
           break;
         }
+        case 'deleteKeyResponse': {
+          this.cache.delete(key);
+          break;
+        }
       }
     };
   }
