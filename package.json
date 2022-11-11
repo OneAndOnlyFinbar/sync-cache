@@ -1,5 +1,13 @@
 {
+  "scripts": {
+    "build": "tsc",
+    "test": "mocha --exit"
+  },
   "dependencies": {
     "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "mocha": "^10.1.0",
+    "should": "^13.2.3"
   }
 }

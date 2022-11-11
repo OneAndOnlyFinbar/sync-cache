@@ -39,8 +39,7 @@ export class CacheClient {
 
     this._ws.onmessage = (payload) => {
       const { operation, success, message, key, value } = JSON.parse(Buffer.from(payload.data, 'base64').toString());
-      if(!success)
-        throw new Error(message);
+      if(!success) return message;
       switch(operation) {
         case 'setKeyResponse': {
           const { key, value, ttl } = JSON.parse(Buffer.from(payload.data, 'base64').toString());

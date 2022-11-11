@@ -9,15 +9,18 @@ export class CacheServer {
 	private _wss: typeof WebSocketServer;
 	private _serverCache: { [key: string]: any } = {};
 	private _connections: typeof WebSocketConnection[] = [];
+    private _debug: boolean;
 	/**
-	 * @param {number} port
-	 * @param {string} password
-	 */
-	constructor({ port, password }: { port: number, password: string }) {
+     * @param {number} port
+     * @param {string} password
+     * @param debug
+     */
+	constructor({ port, password, debug }: { port: number, password: string, debug?: boolean }) {
 		this._httpServer = http.createServer();
 		this._wss = new WebSocketServer({ httpServer: this._httpServer, path: '/ws' });
 		this._port = port;
 		this._password = password;
+        this._debug = debug;
 
 		this._wss.on('request', (request: any) => {
 			const connection: typeof WebSocketConnection = request.accept();
@@ -79,7 +82,11 @@ export class CacheServer {
 		});
 
 		this._httpServer.listen(this._port, () => {
-			console.log(`Server running at http://127.0.0.1:${this._port}/`);
+			if(this._debug)
+                console.log(`Server running at http://127.0.0.1:${this._port}/`);
 		});
 	}
+    close(){
+        this._httpServer.close();
+    }
 }
